@@ -65,11 +65,19 @@ glimpse(GPI)
 
 ```
 
+今回はランキングのデータだけを必要としますので、`select()`のユーティリティー関数、`ends_with()`を利用して"rank"がカラム名の終わりにあるカラムだけを選択します。これを新しいデータフレーム、"GPI_rank"にセーブします。"rank"が入っているカラムを一つ一つ選ぶ必要がないので非常に便利な関数です。
 
+```{r select}
 
+GPI_rank <- GPI %>% select(Country, ends_with("rank"))
 
+colnames(GPI_rank) <- colnames(GPI_rank) %>% tolower()   # 変数名をすべて小文字に変えます
 
+glimpse(GPI_rank)
 
+```
+
+このデータフレームはご覧のとうりwide型になっています。これをlong型(tidy型)に変えるのは`tidyr`の`gather()`関数を使います。もっと詳しくはHadleyの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
 
 
 
