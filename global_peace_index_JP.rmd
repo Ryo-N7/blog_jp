@@ -79,74 +79,8 @@ glimpse(GPI_rank)
 
 このデータフレームはご覧のとうりwide型になっています。これをlong型(tidy型)に変えるのは`tidyr`の`gather()`関数を使います。もっと詳しくはHadleyの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
 
-
-
-
-The Global Peace Index (GPI) was created by the Institute for Economics and Peace (IEP), a think tank with a dedication to measuring positive human well-being and progress, and is one attempt to quantitatively measure the relative position of a nations' and regions' peacefulness. The official 2017 report visualizes the most recent data as a map below: 
-![GPI map](https://upload.wikimedia.org/wikipedia/commons/e/e8/GPI_2017.jpg)
-
-Today I will web scrape the GPI data from **2008** to **2017** from Wikipedia using the `rvest` package and use a variety of data tidying packages such as `dplyr`, `tidyr`, and `stringr` to create a **bump chart** to visualize the GPI index data in another way!
-
-```{r }
-# Global Peace Index
-library(tidyverse)          # includes dplyr, tidyr, ggplot2
-library(scales)             # more options for scales on plots
-library(ggrepel)            # dealing with overlapping text/labels
-library(rvest)              # for web scraping: read_html(), html_table() functions
-library(stringr)            # dealing with strings
-library(forcats)            # change factor levels manually
-
-# Web scrape: -------------------------------------------------------------
-
-url <- "https://en.wikipedia.org/wiki/Global_Peace_Index"
-
-# 12/1/17: update css selector to table.wikitable:nth-child(77)
-
-GPI <- url %>% 
-  read_html() %>% 
-  html_nodes('table.wikitable:nth-child(77)') %>%
-  .[[1]] %>% 
-  html_table(header = TRUE)
-
-```
-
-Here we use the `read_html()` function to read the url of the web page, then we find the **CSS selector** of the table we want to use from the web page. 
-I will go through what I did above step-by-step (Using the Mozilla Firefox browser):
-
-1. Press **F12** or **Ctrl + Shift + C** to open up the *Inspector Tool* on the page you want to extract data from.
-2. Click on the left-most button on the pop-up bar.
-3. Hover your mouse over the element of the page you want to extract. The console will scroll to the exact html code that you are pointing at.
-4. Right-click on the highlighted html code, click on 'Copy' in the menu, then click on 'CSS Selector'
-5. Then Paste into R and place it inside the `html_nodes()` function as above within brackets.
-6. Select only the element with the table information (in this case there is only one element anyways), `[[1]]`.
-7. Finally we specifically extract the table using `html_table()`. You can use the `fill = ` option to autofill any poorly formatted tables. 
-
-There are other ways to do this such as using the *Selector Gadget* ([Tutorial](https://stat4701.github.io/edav/2015/04/02/rvest_tutorial/)).
-Now with our data gathered, let's take a closer inspection at what we have: 
-
-```{r}
-# Inspect scraped data ----------------------------------------------------
-
-glimpse(GPI)
-
-```
-
-For my purposes I only need the data from the `rank` variables so I create a new dataframe excluding the `score` columns. A neat trick here is to use the `ends_with()` function inside `select()` to select all the variables that end in **"rank"**, this is much easier than manually inputting every single **"rank"** column!
-
-```{r}
-# Tidy dataset ------------------------------------------------------------
-
-GPI_rank <- GPI %>% select(Country, ends_with("rank"))
-
-colnames(GPI_rank) <- colnames(GPI_rank) %>% tolower()   # turn "Country" into lower case...
-
-glimpse(GPI_rank)
-
-```
-
 In data analysis, one of the most important part of the process is the data cleaning (also called data tidying or data munging) process that we have been doing here. One of the main tenets of the cleaning process is to have a _tidy_ dataset where we arrange data so that each *variable* is a **column** and each *observation* is a **row**.
 
-We see that the data we have is organized in an _"untidy"_ or _"wide"_ format. To make our analysis workflow smoother we need to convert this data frame into the _tidy_ or _"long"_ format. We do this by using the `gather()` function in the `tidyr` package. For more details on the concept of "**tidy data**" Hadley Wickham's seminal paper on this subject can be found [here](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf).
 
 ```{r}
 GPI_rank <- GPI_rank %>% gather(`2017 rank`:`2008 rank`, key = "year", value = "rank")
@@ -155,30 +89,18 @@ glimpse(GPI_rank)
 
 ```
 
-Next, in the `year` column let's take out the "rank" part of each "20xx rank" value (basically changing the values from '2017 rank' to '2017'). We can do this by using the `str_replace_all()` function from the `stringr` package to specifically take out "rank", and then clean up the remaining white space with `trimws()`.
+次は"year"のカラムから"rank"の文字を消しましょう。`stringr`の`str_replace_all()`で"rank"を"" (ブランク)に変え、`trimws()`で　　　が無い用このカラムをクリームしまそう。そのついでに"year"カラムをfactorに変えましょう。
 
 ```{r}
-GPI_rank$year <- GPI_rank$year %>% str_replace_all("rank", "") %>% trimws()
+GPI_rank <- GPI_rank %>% mutate(year = str_replace_all(year, "rank", "") %>% trimws())
 
-glimpse(GPI_rank)
-
-```
-
-Now we can turn the `year` column into a **factor** variable:
-
-```{r}
 GPI_rank <- GPI_rank %>% mutate(year = as.factor(year))
-levels(GPI_rank$year)     # now as factor + no "rank" afterwards.
+
+glimpse(GPI_rank) # levels(GPI_rank$year)
 
 ```
 
-Let's inspect our work so far!
-
-```{r}
-GPI_rank %>% head(15)
-
-```
-
+また`glimpse()`で　progress?? 様子　を見てみると
 We can see here that there are countries with a tied ranking due to similar GPI scores (shown in original GPI table), first let's get rid of the `=` symbol:
 
 ```{r}
