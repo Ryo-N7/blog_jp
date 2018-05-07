@@ -140,11 +140,9 @@ GPI_rank <- GPI_rank %>%
 
 ```
 
-Now ALL the tied ranks are fixed with the second tied rank value taking on a `n+1` rank value instead!
-
 ## Plotting
 
-Now let's create a **custom ggplot theme** that we can add on to our plot and call it... `theme_peace`!
+データクリーニングを終えてやっとggplotを使えます。でもグラフを作る前に、このGPIデータ専用のggplot theme, 名付けて`theme_peace`,を作りましょう！
 
 ```{r}
 # Create custom theme -----------------------------------------------------
@@ -162,6 +160,10 @@ theme_peace <-
         legend.position = "none")
 
 ```
+
+theme()の関数でグラフの色々な設定をdefaultから変更します。
+
+
 
 The type of plot we are going to create is called a **bump chart** which are used to visualize changes in rank over periods of time, which is perfect for our current analysis!
 Here let's specifically highlight the ranking over time for Japan by coloring its line to red and making the other countries more transparent by creating an `if/else` statement that evaluates whether the country being plotted is Japan or not. Also by using `geom_text` we can manually add labels next to both the `2008` and `2017` variables:
