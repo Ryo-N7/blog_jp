@@ -161,12 +161,9 @@ theme_peace <-
 
 ```
 
-theme()の関数でグラフの色々な設定をdefaultから変更します。
+`theme()`の関数でグラフの色々な設定をdefaultから変更します。
 
-
-
-The type of plot we are going to create is called a **bump chart** which are used to visualize changes in rank over periods of time, which is perfect for our current analysis!
-Here let's specifically highlight the ranking over time for Japan by coloring its line to red and making the other countries more transparent by creating an `if/else` statement that evaluates whether the country being plotted is Japan or not. Also by using `geom_text` we can manually add labels next to both the `2008` and `2017` variables:
+これから作るグラフは”バンプチャート”と言い、主には順位の経時的な変化を可視化するビジュアライゼーションです。最初は日本のランキングを重視できるよう、線を赤色に、それで他の国の線はalphaの引数で透明度を変えましょう。`geom_text()`の関数で両端のy-axisに国の名（2008年と2017年のトップ10位）を書き加えます。
 
 ```{r fig.height=5, fig.width=8, fig.align='center'}
 # Plotting ----------------------------------------------------------------
@@ -174,7 +171,7 @@ Here let's specifically highlight the ranking over time for Japan by coloring it
 GPI_rank %>% 
   mutate(jpn = ifelse(country == "Japan", T, F)) %>% 
   ggplot(aes(year, rank, group = country)) +
-  geom_line(aes(color = jpn, alpha = jpn), size = 2) +  # "Using alpha for discrete var is NOT advised"
+  geom_line(aes(color = jpn, alpha = jpn), size = 2) +  
   geom_point(aes(color = jpn, alpha = jpn), size = 2.3) +
   geom_text(data = GPI_rank %>% filter(year == "2008", rank <= 10), 
             aes(label = country), color = "black", size = 4, nudge_x = -0.45) +
@@ -190,7 +187,14 @@ GPI_rank %>%
 
 ```
 
-We can clearly see that Japan's ranking has fallen from 2008 and even dropping out of the Top 10 altogether in 2017 (*Note*: technically Ireland and Japan were tied for 10th in 2017)! Could this be a result of the rising tensions in the past 10 years with its neighbors on a number of issues, such as the [East China Sea disputes](https://www.japantimes.co.jp/opinion/2017/08/29/commentary/japan-commentary/japans-maritime-diplomacy-mission-s-e-asia/), the more recent protests regarding the [comfort women issue](https://www.nytimes.com/2017/04/03/world/asia/japan-ambassador-south-korea-comfort-woman.html), and of course North Korea's recent [missile tests](http://www.bbc.co.uk/news/world-asia-41281050) among others? Let's see if there is a general downward trend in the East Asia region between 2008 and 2017! Neither `Macau` or `Hong Kong` are in the data as they are counted as dependent territories and from what we know of recent conflicts in the *"marginal seas"* of the Pacific, we include some ASEAN contries such as Vietnam and the Philippines.  
+可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも
+
+We can clearly see that Japan's ranking has fallen from 2008 and even dropping out of the Top 10 altogether in 2017 (*Note*: technically Ireland and Japan were tied for 10th in 2017)! Could this be a result of the rising tensions in the past 10 years with its neighbors on a number of issues, such as the [East China Sea disputes](https://www.japantimes.co.jp/opinion/2017/08/29/commentary/japan-commentary/japans-maritime-diplomacy-mission-s-e-asia/), the more recent protests regarding the [comfort women issue](https://www.nytimes.com/2017/04/03/world/asia/japan-ambassador-south-korea-comfort-woman.html), and of course North Korea's recent [missile tests](http://www.bbc.co.uk/news/world-asia-41281050) among others? 
+
+日本の下降は東アジアの地方すべてを示す傾向か`filter()`を使って焦点を絞ってみましょう。
+
+
+Let's see if there is a general downward trend in the East Asia region between 2008 and 2017! Neither `Macau` or `Hong Kong` are in the data as they are counted as dependent territories and from what we know of recent conflicts in the *"marginal seas"* of the Pacific, we include some ASEAN contries such as Vietnam and the Philippines.  
 
 ```{r}
 # Subset custom "East Asia" region -----------------------------------------------
@@ -226,6 +230,8 @@ GPI_Asia %>%
 ```
 
 There could still be some improvements made to this plot, specifically, the country labels on either side of the x-axis limits. We can fix this by Using the `gg_repel` package that will spread them out and create a small line/arrow from the label box pointing to the corresponding line or point. We can also manually set colors to each of our custom "East Asia" region countries to further differntiate each line and make it more easy to read:
+
+`gg_repel`のパッケージで文字列が重なり合わない用にします。
 
 ```{r}
 
@@ -273,7 +279,10 @@ GPI_Asia %>%
 
 ```
 
-Of course, the changes in rankings aren't **_all_** due to inter-country conflicts as it is only 1 of the 23 indicators used to calculate the GPI score. Both external peace indicators (*military expenditure as a percentage of GDP*, _nuclear and heavey weapons capabilities_, and _relations with neighboring countries_) **and** internal peace indicators (*level of violent crime*, _political instability_, _impact of terrorism_) are used in calculating the GPI. The full run-down on the various indicators can be found in Appendix B of the most recent GPI Report [here](http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf).  
+勿論、ランキングの変化はすべて国際的な＿＿＿で変わっている訳ではありません、＿＿はGPIスコアを計算する23個の＿＿の一つの
+Of course, the changes in rankings aren't **_all_** due to inter-country conflicts as it is only 1 of the 23 indicators used to calculate the GPI score. 
+
+Both external peace indicators (*military expenditure as a percentage of GDP*, _nuclear and heavey weapons capabilities_, and _relations with neighboring countries_) **and** internal peace indicators (*level of violent crime*, _political instability_, _impact of terrorism_) are used in calculating the GPI. The full run-down on the various indicators can be found in Appendix B of the most recent GPI Report [here](http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf).  
 There is another way to do the above but first I'll clean up the data further by changing the names of the Koreas in the main dataset like we did in `GPI_Asia`:
 
 ```{r}
