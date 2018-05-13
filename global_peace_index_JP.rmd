@@ -279,8 +279,13 @@ GPI_Asia %>%
 
 ```
 
-勿論、ランキングの変化はすべて国際的な＿＿＿で変わっている訳ではありません、＿＿はGPIスコアを計算する23個の＿＿の一つの
-Of course, the changes in rankings aren't **_all_** due to inter-country conflicts as it is only 1 of the 23 indicators used to calculate the GPI score. 
+勿論、ランキングの変化はすべて国際的な＿＿＿で変わっている訳ではありません、＿＿はGPIスコアを計算する23個の指標の一つでしかありません。
+Of course, the changes in rankings aren't **_all_** due to inter-country conflicts as it is only 1 of the 23 indicators used to calculate the GPI score. GPIは　　と　　　両方ともを計算されて作られている
+
+国外指標
+国内指標
+
+詳細は最新のGPIレポートのアペンディックスBを呼んで下さい。
 
 Both external peace indicators (*military expenditure as a percentage of GDP*, _nuclear and heavey weapons capabilities_, and _relations with neighboring countries_) **and** internal peace indicators (*level of violent crime*, _political instability_, _impact of terrorism_) are used in calculating the GPI. The full run-down on the various indicators can be found in Appendix B of the most recent GPI Report [here](http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf).  
 There is another way to do the above but first I'll clean up the data further by changing the names of the Koreas in the main dataset like we did in `GPI_Asia`:

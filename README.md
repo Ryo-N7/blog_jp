@@ -15,6 +15,7 @@ Global Peace Index EDA:
 - ~~explaining each data tidying/cleaning steps~~
 - ^ some edits to certain parts still needed but mainly finished
 - explain theme >>> in more detail than original post
+- explain details of the GPI variables
 - explain bump charts
 - explain first bump chart
 - subset East Asia region section
