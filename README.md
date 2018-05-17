@@ -8,9 +8,9 @@ TO DOs:
 - keep reading more R blog posts in Japanese
 
 
-blog posts: (most recent: 5.8.18)
+blog posts: (most recent: 5.17.18)
 
-Global Peace Index EDA: 
+Global Peace Index EDA: (**Aiming to release by end of May**)
 - ~~webscraping instructions >>> Japanese~~
 - ~~explaining each data tidying/cleaning steps~~
 - ^ some edits to certain parts still needed but mainly finished
