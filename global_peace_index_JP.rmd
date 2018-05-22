@@ -77,7 +77,11 @@ glimpse(GPI_rank)
 
 ```
 
-このデータフレームはご覧のとうりwide型になっています。これをlong型(tidy型)に変えるのは`tidyr`の`gather()`関数を使います。もっと詳しくはHadleyの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
+このデータフレームはご覧のとうりwide型になっています。
+
+これをtidy化、すなわち各列が個々の変数と各行が個々の観測、に加工するには`tidyr`の`gather()`関数を使います。もっと詳しくはHadleyの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
+
+これをlong型(tidy型)に変えるの
 
 In data analysis, one of the most important part of the process is the data cleaning (also called data tidying or data munging) process that we have been doing here. One of the main tenets of the cleaning process is to have a _tidy_ dataset where we arrange data so that each *variable* is a **column** and each *observation* is a **row**.
 
@@ -187,14 +191,12 @@ GPI_rank %>%
 
 ```
 
-可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも
+可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも　　　もしかして
 
 We can clearly see that Japan's ranking has fallen from 2008 and even dropping out of the Top 10 altogether in 2017 (*Note*: technically Ireland and Japan were tied for 10th in 2017)! Could this be a result of the rising tensions in the past 10 years with its neighbors on a number of issues, such as the [East China Sea disputes](https://www.japantimes.co.jp/opinion/2017/08/29/commentary/japan-commentary/japans-maritime-diplomacy-mission-s-e-asia/), the more recent protests regarding the [comfort women issue](https://www.nytimes.com/2017/04/03/world/asia/japan-ambassador-south-korea-comfort-woman.html), and of course North Korea's recent [missile tests](http://www.bbc.co.uk/news/world-asia-41281050) among others? 
 
-日本の下降は東アジアの地方すべてを示す傾向か`filter()`を使って焦点を絞ってみましょう。
+日本の下降は東アジアの地方すべてを示す傾向か`filter()`を使って焦点を絞ってみましょう。このグループに南シナ海で領土・権益問題に加わっているフィリピンやベトナムも入れましょう。
 
-
-Let's see if there is a general downward trend in the East Asia region between 2008 and 2017! Neither `Macau` or `Hong Kong` are in the data as they are counted as dependent territories and from what we know of recent conflicts in the *"marginal seas"* of the Pacific, we include some ASEAN contries such as Vietnam and the Philippines.  
 
 ```{r}
 # Subset custom "East Asia" region -----------------------------------------------
@@ -210,6 +212,8 @@ GPI_Asia$rank <- as.numeric(GPI_Asia$rank)
 ```
 
 Now we are all ready to start plotting!
+
+これで準備完了！
 
 ```{r fig.height=5, fig.width=8, fig.align='center'}
 # Plot "East Asia" region -------------------------------------------------
@@ -279,15 +283,9 @@ GPI_Asia %>%
 
 ```
 
-勿論、ランキングの変化はすべて国際的な＿＿＿で変わっている訳ではありません、＿＿はGPIスコアを計算する23個の指標の一つでしかありません。
-Of course, the changes in rankings aren't **_all_** due to inter-country conflicts as it is only 1 of the 23 indicators used to calculate the GPI score. GPIは　　と　　　両方ともを計算されて作られている
+勿論、ランキングの変化はすべて国際的な理由で変わっている訳ではありません、「近隣国との関係」はGPIスコアを計算する23個の指標の一つでしかありません。他には殺人事件数、GDPに対する軍事費の比率、政治不安定さ等の項目からGPIが計算されています。詳細は最新の(GPIレポート)[http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf]のアペンディックスBを呼んで下さい。
 
-国外指標
-国内指標
 
-詳細は最新のGPIレポートのアペンディックスBを呼んで下さい。
-
-Both external peace indicators (*military expenditure as a percentage of GDP*, _nuclear and heavey weapons capabilities_, and _relations with neighboring countries_) **and** internal peace indicators (*level of violent crime*, _political instability_, _impact of terrorism_) are used in calculating the GPI. The full run-down on the various indicators can be found in Appendix B of the most recent GPI Report [here](http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf).  
 There is another way to do the above but first I'll clean up the data further by changing the names of the Koreas in the main dataset like we did in `GPI_Asia`:
 
 ```{r}
@@ -338,7 +336,29 @@ GPI_rank %>%
 
 With the colored lines and the labels we can clearly see the downward trend of GPI rankings for all countries in the East Asia region. The exception is Taiwan which although shown as 37th in 2008, it was technically tied with Tunisia and South Korea, and they basically reverted back to their actual 2008 rank (40th) after a brief rise.  
 
+色を付けた線とレッテルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外は　　台湾。
+
+
+
+
+
 Hopefully with initiatives like the GPI and the works of other peace-oriented think tanks, the public can identify different sources of problems that hinder peaceful co-existence both within-countries and between-countries and assist policy-makers in finding viable solutions!
+
+GPIのような指数や他の和平　シンクタンクの活動で　大衆　政治家　国家機関　　が　もっと簡単に　
+
+なぜ治安が悪化しているのかを
+
+要因　　原因　等を特定できるように
+
+分析　　解析でくるよう
+
+
+
+英語も読める方はぜひ他のブログ記事を読んでください。
+次に翻訳するブログ記事は昨年投稿した[Thrice Part 1]()だと考えています。
+
+
+
 
 
 
