@@ -105,7 +105,7 @@ glimpse(GPI_rank)
 
 ```
 
-## Dealing with tied rank values!
+## 同じランクの　　を処理
 
 
 
@@ -131,7 +131,7 @@ GPI_rank <- GPI_rank %>%
 
 ```
 
-## Plotting
+##　ggplot2で可視化！
 
 データクリーニングを終えてやっとggplotを使えます。でもグラフを作る前に、このGPIデータ専用のggplot theme, 名付けて`theme_peace`,を作りましょう！
 
@@ -153,6 +153,8 @@ theme_peace <-
 ```
 
 `theme()`の関数でグラフの色々な設定をdefaultから変更します。
+extrafontのlibraryであらゆるフォントを指定できます。extrafontのインストールの詳細はこの記事をご覧ください。他に注目するオプションは`element_text()`の中のmarginです。このargumentで
+
 
 これから作るグラフは”バンプチャート”と言い、主には順位の経時的な変化を可視化するビジュアライゼーションです。最初は日本のランキングを重視できるよう、線を赤色に、それで他の国の線はalphaの引数で透明度を変えましょう。`geom_text()`の関数で両端のy-axisに国の名（2008年と2017年のトップ10位）を書き加えます。
 
@@ -178,7 +180,7 @@ GPI_rank %>%
 
 ```
 
-可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも　　　もしかして
+可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも　近年の　　もしかして
 
 We can clearly see that Japan's ranking has fallen from 2008 and even dropping out of the Top 10 altogether in 2017 (*Note*: technically Ireland and Japan were tied for 10th in 2017)! Could this be a result of the rising tensions in the past 10 years with its neighbors on a number of issues, such as the [East China Sea disputes](https://www.japantimes.co.jp/opinion/2017/08/29/commentary/japan-commentary/japans-maritime-diplomacy-mission-s-e-asia/), the more recent protests regarding the [comfort women issue](https://www.nytimes.com/2017/04/03/world/asia/japan-ambassador-south-korea-comfort-woman.html), and of course North Korea's recent [missile tests](http://www.bbc.co.uk/news/world-asia-41281050) among others? 
 
@@ -197,8 +199,6 @@ glimpse(GPI_Asia)
 GPI_Asia$rank <- as.numeric(GPI_Asia$rank)
 
 ```
-
-Now we are all ready to start plotting!
 
 これで準備完了！
 
@@ -220,9 +220,11 @@ GPI_Asia %>%
 
 ```
 
-There could still be some improvements made to this plot, specifically, the country labels on either side of the x-axis limits. We can fix this by Using the `gg_repel` package that will spread them out and create a small line/arrow from the label box pointing to the corresponding line or point. We can also manually set colors to each of our custom "East Asia" region countries to further differntiate each line and make it more easy to read:
+There could still be some improvements made to this plot, specifically, the country labels on either side of the x-axis limits. We can also manually set colors to each of our custom "East Asia" region countries to further differntiate each line and make it more easy to read:
 
-`gg_repel`のパッケージで文字列が重なり合わない用にします。
+まだ改善できる所がありますね。
+
+`gg_repel`のパッケージで文字列が重なり合わない用にします。ついでに各国に色を指定しましょう。色は"red", "blue"等名前だけではなく、RではHEX値も使えます、詳しくは　を見てください。
 
 ```{r}
 
@@ -237,15 +239,13 @@ colors = c(
 )
 ```
 
-Change the variable type of `country` into a **factor** and then rename _Korea Republic_ to _S.Korea_ and _DPR Korea_ to _N.Korea_ to fit graph labels better:
+次、`country`をfactor型に変え、`fct_recode()`で"Korea Republic"と"DPR Korea"をプロットで分かりやすい名前("S.Korea"と"N.Korea")に変えましょう。
 
 ```{r fig.height=5, fig.width=8, fig.align='center'}
 
-GPI_Asia$country <- as.factor(GPI_Asia$country)
-GPI_Asia %>% glimpse()
-
 GPI_Asia <- GPI_Asia %>% 
-   mutate(country = fct_recode(country,
+   mutate(country = as.factor(country),
+          country = fct_recode(country,
                                  "S.Korea" = "Korea Republic",
                                  "N.Korea" = "DPR Korea"))
 
@@ -271,8 +271,6 @@ GPI_Asia %>%
 ```
 
 勿論、ランキングの変化はすべて国際的な理由で変わっている訳ではありません、「近隣国との関係」はGPIスコアを計算する23個の指標の一つでしかありません。他には殺人事件数、GDPに対する軍事費の比率、政治不安定さ等の項目からGPIが計算されています。詳細は最新の(GPIレポート)[http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf]のアペンディックスBを呼んで下さい。
-
-上記のfilterはもう一つのやり方もあります。その前にKorea RepublicとDPR Koreaをもっと簡単な名前に変えましょう。
 
 今度はわざわざ新しいデータフレーム(例えGPI_Asia)を作るより、`ggplot()`関数の前に`magrittr`のパイプで`filter()`や`mutate()`を使いましょう。
 
@@ -317,9 +315,8 @@ With the colored lines and the labels we can clearly see the downward trend of G
 
 色を付けた線とレッテルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外は　　台湾。
 
-
-
-
+このブログポストではデータ　から可視化まで　　ステップーバイーステップにて
+あんまり深く探りませんでしたがEDAとしてはいい例だと思っています　参考になれば幸いです。
 
 Hopefully with initiatives like the GPI and the works of other peace-oriented think tanks, the public can identify different sources of problems that hinder peaceful co-existence both within-countries and between-countries and assist policy-makers in finding viable solutions!
 
@@ -333,8 +330,7 @@ GPIのような指数や他の和平　シンクタンクの活動で　大衆�
 
 
 
-英語も読める方はぜひ他のブログ記事を読んでください。
-次に翻訳するブログ記事は昨年投稿した[Thrice Part 1]()だと考えています。
+英語も読める方はぜひ他のブログ記事を読んでください。次に翻訳するブログ記事は昨年投稿した[Thrice Part 1]()だと考えています。
 
 
 
