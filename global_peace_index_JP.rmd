@@ -15,9 +15,12 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 世界平和度指数はInstitue for Economics and Peace (IEP)と呼ばれるシンクタンクに作られた指数で、各国と地域の平和度を数値化する試みである。今回はこの世界平和度
 指数のデータを`rvest`でWikipediaからウェブスクレープし、`dplyr`、`tidyr`、`stringr`などのデータクリーニングパッケージを使い、最終的に"バンプチャート"というビジュアライゼーションで可視化します。
 
-2017年度のデータから作成された地図：
+この記事でRでのデータ分析ワークフローを一歩ずつ説明していきたいと思います。
+
+最初に2017年度のデータから作成された地図を見てみましょう：
 ![GPI map](https://upload.wikimedia.org/wikipedia/commons/e/e8/GPI_2017.jpg)
 
+最終的にこのデータを他の可視化をして　
 では、始めましょう！
 
 ```{r ウェブスクレープ}
