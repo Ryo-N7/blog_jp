@@ -108,9 +108,7 @@ glimpse(GPI_rank)
 
 ```
 
-## 同じランクの　　を処理
-
-
+## 同じランクのデータを処理
 
 `rank()`関数の"ties.method"引数で同じランクの国々をアルファベット順で並べ替えます。
 
@@ -155,9 +153,9 @@ theme_peace <-
 
 ```
 
-`theme()`の関数でグラフの色々な設定をdefaultから変更します。
+`theme()`の関数でグラフの色々な設定をdefaultから変更できます。
 extrafontのlibraryであらゆるフォントを指定できます。extrafontのインストールの詳細はこの記事をご覧ください。他に注目するオプションは`element_text()`の中のmarginです。このargumentで
-
+あとは`element_text()`でaxis, legend, title文字列のサイズを指定します。
 
 これから作るグラフは”バンプチャート”と言い、主には順位の経時的な変化を可視化するビジュアライゼーションです。最初は日本のランキングを重視できるよう、線を赤色に、それで他の国の線はalphaの引数で透明度を変えましょう。`geom_text()`の関数で両端のy-axisに国の名（2008年と2017年のトップ10位）を書き加えます。
 
@@ -193,13 +191,12 @@ We can clearly see that Japan's ranking has fallen from 2008 and even dropping o
 ```{r}
 # Subset custom "East Asia" region -----------------------------------------------
 
-GPI_Asia <- GPI_rank %>% filter(country %in% c("Japan", "China", "Korea Republic", "DPR Korea", 
-                                               "Philippines", "Taiwan", "Vietnam")) %>% 
-  mutate(region = "East Asia")
+GPI_Asia <- GPI_rank %>% 
+  filter(country %in% c("Japan", "China", "Korea Republic", "DPR Korea", 
+                        "Philippines", "Taiwan", "Vietnam")) %>% 
+  mutate(rank = as.numeric(rank))
 
 glimpse(GPI_Asia)
-
-GPI_Asia$rank <- as.numeric(GPI_Asia$rank)
 
 ```
 
@@ -223,11 +220,9 @@ GPI_Asia %>%
 
 ```
 
-There could still be some improvements made to this plot, specifically, the country labels on either side of the x-axis limits. We can also manually set colors to each of our custom "East Asia" region countries to further differntiate each line and make it more easy to read:
+まだ改善できる所がありますね。特に文字列が重なり合っている事と各ラインの色をもっと分かりやすくできると思います。
 
-まだ改善できる所がありますね。
-
-`gg_repel`のパッケージで文字列が重なり合わない用にします。ついでに各国に色を指定しましょう。色は"red", "blue"等名前だけではなく、RではHEX値も使えます、詳しくは　を見てください。
+最初の方は`gg_repel`のパッケージで文字列が重なり合わない用にします。ついでに各国に色を指定しましょう。色は"red", "blue"等名前だけではなく、RではHEX値も使えます、詳しくは　を見てください。
 
 ```{r}
 
@@ -275,9 +270,8 @@ GPI_Asia %>%
 
 勿論、ランキングの変化はすべて国際的な理由で変わっている訳ではありません、「近隣国との関係」はGPIスコアを計算する23個の指標の一つでしかありません。他には殺人事件数、GDPに対する軍事費の比率、政治不安定さ等の項目からGPIが計算されています。詳細は最新の(GPIレポート)[http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf]のアペンディックスBを呼んで下さい。
 
-今度はわざわざ新しいデータフレーム(例えGPI_Asia)を作るより、`ggplot()`関数の前に`magrittr`のパイプで`filter()`や`mutate()`を使いましょう。
-
-次に`mutate()`で`region`(地方)のカラムを作ります。`region`はブーリアン型のカラムで`country`が先ほど定義した国々だと"East Asia"になり、他の国は"Other"になります。それでfilter()で"East Asia"だけを選択しggplotにパイプします。
+今度はわざわざ新しいデータフレーム(例えGPI_Asia)を作るより、`ggplot()`関数の前に`magrittr`のパイプで`filter()`や`mutate()`の関数を繋いでいきましょう。最初に`mutate()`で`region`(地方)のカラムを作ります。`region`は`if_else()`でブーリアン型のカラムとして作り、`country`が先ほど定義した国々だと"East Asia"になり、他の国は"Other"になります。それでfilter()で"East Asia"だけの国を選択しggplotにパイプで
+コネクトします。
 
 ```{r fig.height=6, fig.width=8, fig.align='center'}
 # Final plot: East Asia ---------------------------------------------------
@@ -314,9 +308,8 @@ GPI_rank %>%
 
 ```
 
-With the colored lines and the labels we can clearly see the downward trend of GPI rankings for all countries in the East Asia region. The exception is Taiwan which although shown as 37th in 2008, it was technically tied with Tunisia and South Korea, and they basically reverted back to their actual 2008 rank (40th) after a brief rise.  
 
-色を付けた線とレッテルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外は　　台湾。
+色を付けた線とレッテルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外はランクを一上一下した台湾。
 
 このブログポストではデータ　から可視化まで　　ステップーバイーステップにて
 あんまり深く探りませんでしたがEDAとしてはいい例だと思っています　参考になれば幸いです。
