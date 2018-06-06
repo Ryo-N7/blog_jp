@@ -12,15 +12,14 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 
-世界平和度指数はInstitue for Economics and Peace (IEP)と呼ばれるシンクタンクに作られた指数で、各国と地域の平和度を数値化する試みである。今回はこの世界平和度
-指数のデータを`rvest`でWikipediaからウェブスクレープし、`dplyr`、`tidyr`、`stringr`などのデータクリーニングパッケージを使い、最終的に"バンプチャート"というビジュアライゼーションで可視化します。
+世界平和度指数はInstitute for Economics and Peace (IEP)と呼ばれるシンクタンクが作った指数で、各国と地域の平和度を数値化する試みであります。このデータで何ができるんだろうと思っていれば、2017年度のデータから作成された地図を見てみましょう。
+![GPI map](https://upload.wikimedia.org/wikipedia/commons/e/e8/GPI_2017.jpg)
+
+
+GPIの[ウェブサイト](http://visionofhumanity.org/indexes/global-peace-index/)を見れば他にも参考になるビジュアリゼーションがあります。今回はこの世界平和度指数のデータを`rvest`でWikipediaからウェブスクレープし、`dplyr`、`tidyr`、`stringr`などのTidyverseパッケージを使い、最終的に**バンプチャート**というビジュアライゼーションで可視化します。
 
 この記事でRでのデータ分析ワークフローを一歩ずつ説明していきたいと思います。
 
-最初に2017年度のデータから作成された地図を見てみましょう：
-![GPI map](https://upload.wikimedia.org/wikipedia/commons/e/e8/GPI_2017.jpg)
-
-最終的にこのデータを他の可視化をして　
 では、始めましょう！
 
 ```{r ウェブスクレープ}
@@ -54,7 +53,7 @@ GPI <- url %>%
 6.　データテーブルが入っているエレメントをセレクトする。(`.[[1]]`)
 7.　データテーブルを`html_table()`の関数で引き抜きます。
 
-[**Selector Gadget**]()や他のやり方でウェブページからデータを引き抜く事もできます。
+[**Selector Gadget**](http://selectorgadget.com/)や他のやり方でウェブページからデータを引き抜く事もできます。
 
 では、Wikipediaから引き抜いたデータを見てみましょう。
 
@@ -76,7 +75,7 @@ glimpse(GPI_rank)
 
 ```
 
-このデータフレームはご覧のとうりwide型になっています。これをtidy化、すなわち各列が個々の変数と各行が個々の観測、に加工するには`tidyr`の`gather()`関数を使います。もっと詳しくはHadley Wickhamの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
+このデータフレームはご覧の通りwide型になっています。これをtidy化、すなわち各列が個々の変数と各行が個々の観測、に加工するには`tidyr`の`gather()`関数を使います。もっと詳しくはHadley Wickhamの[論文](https://www.jstatsoft.org/article/view/v059i10/v59i10.pdf)を読んでください。
 
 ```{r}
 GPI_rank <- GPI_rank %>% gather(`2017 rank`:`2008 rank`, key = "year", value = "rank")
@@ -85,18 +84,18 @@ glimpse(GPI_rank)
 
 ```
 
-次は"year"のカラムから"rank"の文字を消しましょう。`stringr`の`str_replace_all()`で"rank"を"" (ブランク)に変え、`trimws()`で文字列に空白が無い用にしまそう。そのついでに"year"カラムをfactorに変えましょう。
+次は"year"のカラムから"rank"の文字を消しましょう。`stringr`の`str_replace_all()`で"rank"を"" (ブランク)に変え、`trimws()`で文字列に空白が無い用にしましょう。そのついでに"year"カラムをfactorに変えましょう。
 
 ```{r}
 GPI_rank <- GPI_rank %>% mutate(year = str_replace_all(year, "rank", "") %>% trimws())
 
 GPI_rank <- GPI_rank %>% mutate(year = as.factor(year))
 
-glimpse(GPI_rank) # levels(GPI_rank$year)
+GPI_rank %>% filter(year == 2008) %>% slice(9:20) # levels(GPI_rank$year)
 
 ```
 
-また`glimpse()`でデータフレームを見てみると。。。少数の国々が同じGPIランクになっている事が見えます。その国の"rank"カラムには位置の値の前に"＝"が入っていますので、この記号を`stringr`の`str_replace()`関数で消しましょう。その次に"rank"をnumericに変えて、データフレームを`arrange()`で"year", "rank"の順に変えましょう(2008: Rank #1 - #163, 2009: Rank #1 - #163, etc.)。
+またデータフレームを見てみると。。。少数の国々が同じGPIランクになっている事が見えます。その国の"rank"カラムには位置の値の前に"＝"が入っていますので、この記号を`stringr`の`str_replace()`関数で消しましょう。その次に"rank"をnumericに変えて、データフレームを`arrange()`で"year", "rank"の順に変えましょう(2008: Rank #1 - #163, 2009: Rank #1 - #163, etc.)。
 
 ```{r}
 GPI_rank <- GPI_rank %>% 
@@ -113,18 +112,18 @@ glimpse(GPI_rank)
 記号を取りぬいた後、`rank()`関数の"ties.method"引数で同じランクの国々をアルファベット順で並べ替えます。
 
 ```{r}
+# BosniaとBangladeshは同じランク("84")になっています。
 GPI_rank %>% 
   group_by(year) %>% 
   filter(year == 2017) %>% 
   slice(84:85)
 
-# BosniaとBangladeshは同じランク("84")になっています。
-
+# Bangladeshが84位とBosnia & Herzegovinaが85位になりました!
 GPI_rank %>% 
   group_by(year) %>% 
   mutate(rank = rank(rank, ties.method = "first")) %>% 
   filter(year == 2017) %>% 
-  slice(84:85)             # Bangladeshが84位とBosnia & Herzegovinaが85位になりました!
+  slice(84:85)             
 
 GPI_rank <- GPI_rank %>% 
   group_by(year) %>% 
@@ -168,7 +167,7 @@ GPI_rank %>%
   mutate(jpn = ifelse(country == "Japan", T, F)) %>% 
   ggplot(aes(year, rank, group = country)) +
   geom_line(aes(color = jpn, alpha = jpn), size = 2) +  
-  geom_point(aes(color = jpn, alpha = jpn), size = 2.3) +
+  geom_point(aes(color = jpn, alpha = jpn), size = 4) +
   geom_text(data = GPI_rank %>% filter(year == "2008", rank <= 10, country != "Japan"), 
             aes(label = country), color = "black", 
             family = "Garamond", fontface = "bold",
@@ -194,16 +193,15 @@ GPI_rank %>%
 上記のggplotコードをもう少し説明しましょう：
 
 - `geom_text()`の関数で両端のy-axisに国の名（2008年と2017年のトップ10位）を書き加えます。
-- `coord_cartesian()`で１位から１０位だけの描画領域を見せます。
-- `scale_y_reverse()`
+- `coord_cartesian()`で１位から１０位だけのy-axis描画領域を見せます。
+- `scale_y_reverse()`でy-axisを降順に表示できます。
 - `theme_peace`は先ほど作ったthemeです。
-- `scale_color_manual()`でラインの色を指定します。
-- `scales::pretty_breaks()`の変数はx-axis/y-axisのティック数を指定します。
+- `scale_color_manual()`でラインの色を指定できます。
+- `scales::pretty_breaks()`の変数でx-axis/y-axisのティック数を指定できます。
 
 可視化しますと日本のGPI順位が年々下がっている事が明らかになります（＊２０１７年はアイルランドと同位でしたが上記のデータクリーニングで日本が11位になりました＊）。これはもしも近年の南シナ海・日本海での[領土問題](https://www.japantimes.co.jp/opinion/2017/08/29/commentary/japan-commentary/japans-maritime-diplomacy-mission-s-e-asia/)、日韓関係を揺さぶる[慰安婦問題](https://www.nytimes.com/2017/04/03/world/asia/japan-ambassador-south-korea-comfort-woman.html)、もしくは北朝鮮の[ミサイル発射実験](http://www.bbc.co.uk/news/world-asia-41281050)などの影響でしょうか？
 
 日本の下降は東アジアの地方すべてを示す傾向か`filter()`を使って焦点を絞ってみましょう。このグループに南シナ海で領土・権益問題に加わっているフィリピンやベトナムも入れましょう。
-
 
 ```{r fig.height=5, fig.width=8, fig.align='center'}
 # Subset custom "East Asia" region -----------------------------------------------
@@ -235,7 +233,7 @@ GPI_Asia %>%
 
 ```
 
-まだ改善できる所がありますね。特に文字列が重なり合っている事と各ラインに色を付けてもっと分かりやすくできると思います。最初の方は`gg_repel`のパッケージで文字列が重なり合わない用にします。ついでに各国に色を指定しましょう。色は"red", "blue"等名前だけではなく、RではHEX値も使えます、どの色を選ぶかを迷っていたら[これ](http://colorbrewer2.org/)か[このadd-in](https://github.com/daattali/colourpicker)を見てください。
+まだ改善できる所がありますね。特に文字列が重なり合っている事と各ラインに色を付けてもっと分かりやすくできると思います。最初の方は`gg_repel`のパッケージで文字列が重なり合わない用にします。ついでに各国に色を指定しましょう。Rでは"red", "blue"等の色名だけではなく、HEX値も使えます、どの色を選ぶかを迷っていたら[このウェッブページ](http://colorbrewer2.org/)か[このRStudio add-in](https://github.com/daattali/colourpicker)を見てください。
 
 ```{r}
 
@@ -264,11 +262,11 @@ GPI_Asia %>%
   ggplot(aes(year, as.numeric(rank), group = country)) +
   geom_line(aes(color = country), size = 1.15) +
   geom_point(aes(color = country), size = 2.5) +
-  geom_label_repel(data = GPI_Asia %>% filter(year == "2008"), 
+  geom_text_repel(data = GPI_Asia %>% filter(year == "2008"), 
                   aes(label = country, x = "2008"), family = "Garamond",
                   color = "black", size = 3.5, nudge_x = -0.9, 
                   fontface = "bold", segment.colour = "red") +
-  geom_label_repel(data = GPI_Asia %>% filter(year == "2017"), 
+  geom_text_repel(data = GPI_Asia %>% filter(year == "2017"), 
                    aes(label = country, x = "2017"), family = "Garamond",
                    color = "black", size = 3.5, nudge_x = 1.5,
                    fontface = "bold", segment.colour = "red") +
@@ -281,10 +279,10 @@ GPI_Asia %>%
 
 ```
 
-勿論、ランキングの変化はすべて国際的な理由で変わっている訳では無い、「近隣国との関係」はGPIスコアを計算する23個の指標の一つでしかありません。他には殺人事件数、GDPに対する軍事費の比率、政治不安定さ等の項目からGPIが計算されています。詳細は最新の(GPIレポート)[http://visionofhumanity.org/app/uploads/2017/06/GPI17-Report.pdf]のアペンディックスBを呼んで下さい。
+勿論、ランキングの変化はすべて国際的な理由で変わっている訳では無い、「近隣国との関係」はGPIスコアを計算する23個の指標の一つでしかありません。他には殺人事件数、GDPに対する軍事費の比率、政治不安定さ等の項目からGPIが計算されています。詳細は最新の(GPIレポート)[http://visionofhumanity.org/indexes/global-peace-index/]のアペンディックスBを呼んで下さい。
 
 今度はわざわざ新しいデータフレーム(例えGPI_Asia)を作るより、`ggplot()`関数の前に`magrittr`のパイプで`filter()`や`mutate()`の関数を繋いでいきましょう。最初に`mutate()`で`region`(地方)のカラムを作ります。`region`は`if_else()`でブーリアン型のカラムとして作り、`country`が先ほど定義した国々だと"East Asia"になり、他の国は"Other"になります。それで`filter()`で"East Asia"だけの国を選択しggplotにパイプで
-通します。
+通します。今回は国の名前を表示するのに`geom_label_repel()`を使ってみましょう。
 
 ```{r fig.height=6, fig.width=8, fig.align='center'}
 # Final plot: East Asia ---------------------------------------------------
@@ -320,23 +318,9 @@ GPI_rank %>%
 
 ```
 
-色を付けた線とラベルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外はランクを一上一下した台湾。
+色を付けた線とラベルで東・東南アジアのランクが徐々に下降している傾向が明らかに見えます。例外はランクを一上一下した台湾。`geom_label_repel()`を使いますと`geom_text_repel()`よりも国のレーベルがパッと見えるので便利ですね。
 
-
-GPIのような指数や他の和平　シンクタンクの活動で　大衆　政治家　国家機関　　が　もっと簡単に　
-
-なぜ治安が悪化しているのかを
-
-要因　　原因　等を特定できるように
-
-分析　　解析でくるよう
-
-このブログ記事ではデータ収集から可視化までのワークフロー全てを記載しました。あんまり深く探りませんでしたが分析プロジェクトの第一歩、Exploratory Data Analysis (探索データ解析)、としてはいい例だと思っています。Tidyverseの関数を使い、参考になれば幸いです。
+このブログ記事ではデータ収集から可視化までのワークフロー全てを記載しました。あんまり深く探りませんでしたが分析プロジェクトの第一歩、Exploratory Data Analysis (探索データ解析)、としてはいい例だと思っています。このデータでまだいろんな可視化もできますので是非挑戦してみてください(例えばggmapとかで最初に表示したGPIデータの世界地図を再現してみるとか)。この記事がTidyverseやggplotを習っている方々に参考になれば幸いです。
 
 英語も読める方はぜひ他のブログ記事を読んでください。次に翻訳するブログ記事は昨年投稿した[Thrice Part 1]()だと考えています。
-
-
-
-Hopefully with initiatives like the GPI and the works of other peace-oriented think tanks, the public can identify different sources of problems that hinder peaceful co-existence both within-countries and between-countries and assist policy-makers in finding viable solutions!
-
 
