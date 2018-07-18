@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+author: "RN7"
+date: "July 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+先週のTokyoRで発表させて頂きました、　Hadley氏とJoe Rickert氏が
+来日
+
+大規模なイベントでミニ・コンファレンスみたいでした。TokyoRの運営の皆様大変お疲れ様でした。
+
+
+プレゼンが英語でよく聞き取れなかった。。。分かんなかった。。。と言う方の為に自分の日本語力で出来るだけ丁寧に説明したいと思います。
+
+がありましたらこの記事を読んでください。
+
+
+今回の記事で使うパッケージは：
+
+```{r packages, eval=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)   # ggplotをベースとしてサッカーのフィールドを描きます
+library(ggsoccer)  # これでサッカーのフィールドを描けます
+library(dplyr)     # データ処理・クリーニング
+library(purrr)     # tweenrで必要のデータフレーム・リストを作る
+library(gganimate) # アニメーション・その１
+library(tweenr)    # アニメーション・その２
+library(extrafont) # カスタムのフォントをRで使う
+library(ggimage)   # 画像や絵文字をggplotに入れる
+```
+
+この中で一番重要なのはやはりBen Torvaneyさんの`ggsoccer`ですね。パッケージのGitHub Repoは[ここ](https://github.com/Torvaney/ggsoccer). 説明するより見せる方が理解しやすいので早速`ggsoccer`で作ったサッカーフィールドを見てみましょう。
+
+```{r half-pitch template}
+library(ggplot2)
+library(ggsoccer)
+
+data <- data.frame(x = 1, y = 1)
+
+ggplot(data) +
+  annotate_pitch() +
+  theme_pitch() +
+  coord_flip(xlim = c(49, 101),
+             ylim = c(-1, 101))
+```
+
+`annotate_pitch()`の関数は
+`theme_pitch()`の関数は
+それで`coord_*()`類の関数のlimits引数を使って焦点を絞ったりフィールドの方向を変えられます。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
