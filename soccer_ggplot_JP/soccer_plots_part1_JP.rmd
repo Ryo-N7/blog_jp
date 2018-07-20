@@ -54,11 +54,278 @@ ggplot(data) +
 `theme_pitch()`の関数は
 それで`coord_*()`類の関数のlimits引数を使って焦点を絞ったりフィールドの方向を変えられます。
 
+これをベースとして`geom_segment()`や`geom_curve()`関数を使ってボールと選手の動きを表示できます。ですが、この`geom_*()`関数を使うには座標データが必要となります。座標データはスポーツ分析企業、サッカーとしたら特にOpta株式会社が各選手、各試合のデータを生じています。あいにくこのデータはopen sourceでは無く、スポーツ分析企業から購入する必要があります。
+
+他の方々はRSeleniumや他のJavaScriptのウェッブスクレーパーを使用していますが、自分はそのツールを堪能していないので少し苦労しましたが自分で座標データを作ってみました。幸い、`ggsoccer`と`ggplot2`で座標の位置を把握するのがよりに簡単なので思うほど時間は掛かりませんでした。下記の図をご覧になるますと理解できると思います。
+
+![](https://i.imgur.com/ejgbOFg.png) 
+
+最初のゴール以外全てのレーベルと座標のデータフレームはここで表示しませんが、全て[Github]()で見れますので是非ご覧ください。
+
+pass_dataとcurve_dataにパスの座標を入れ、movement_dataにゴロビンとジルコフ選手の動きの座標を入れます。
+
+```{r first goal, fig.height=6, fig.width=8}
+library(ggplot2)
+library(dplyr)
+library(ggsoccer)
+library(ggimage)
+library(extrafont)
+# loadfonts()
+
+#                              2   1  
+pass_data <- data.frame(x = c( 84, 82, 94),
+                        y = c(  6, 32, 35),
+                        x2 = c(77, 84, 83),
+                        y2 = c(13, 8 , 32.5))
+
+#                            corner kick + golovin cross
+curve_data <- data.frame(x = c(100, 76),
+                         y = c(0, 19),
+                         x2 = c(94, 94),
+                         y2 = c(35, 60))
+
+# Gazinsky header
+ball_data <- data.frame(x = c(94),
+                        y = c(60),
+                        x2 = c(99.2),
+                        y2 = c(47.5))
+
+# soccer ball image
+goal_img <- data.frame(x = 100,
+                       y = 47) %>% 
+  mutate(image = "https://d30y9cdsu7xlg0.cloudfront.net/png/43563-200.png")
+
+# golovin + zhirkov movement
+movement_data <- data.frame(x = c(83, 98),
+                           y = c(24.25, 2),
+                           x2 = c(77, 88),
+                           y2 = c(21, 6))
+
+saudi_data <- data.frame(
+  x = c(96.5),
+  y = c(35),
+  label = "M. Al-Breik"
+)
+
+```
 
 
+それで下記がggplotコードです。
 
+- フィールドのベースを作った後、`geom_segment()`や`geom_curve()`で選手とボールの経路を描きます。
+- `geom_image()`でサッカーボールを描きます。
+- `geom_label()`で選手の名札を入れます。
+- `ggtitle()`と`labs()`でタイトルと軸のラベルを入れます。
+- `annotate()`で注釈を入れます。
 
+```{r fig.height=6, fig.width=8}
+ggplot(pass_data) +
+  annotate_pitch() +
+  theme_pitch() + 
+  theme(text = element_text(family = "Dusha V5")) +
+  coord_flip(xlim = c(49, 101),
+             ylim = c(-1, 101)) +
+  geom_segment(aes(x = x, y = y, xend = x2, yend = y2),
+               arrow = arrow(length = unit(0.25, "cm"),
+                             type = "closed")) +
+  geom_segment(data = ball_data,
+               aes(x = x, y = y, xend = x2, yend = y2), 
+               linetype = "dashed", size = 0.85,
+               color = "red") +
+  geom_segment(data = movement_data,
+               aes(x = x, y = y, xend = x2, yend = y2), 
+               linetype = "dashed", size = 1.2,
+               color = "black") +
+  geom_curve(data = curve_data, 
+             aes(x = x, y = y, xend = x2, yend = y2), 
+             curvature = 0.25, 
+             arrow = arrow(length = unit(0.25, "cm"),
+                           type = "closed")) +
+  geom_image(data = goal_img,
+             aes(x = x, y = y,
+                 image = image), 
+             size = 0.035) +
+  geom_label(aes(x = 94, y = 60, 
+                 label = "Gazinsky"), 
+             hjust = -0.1, color = "red", family = "Dusha V5") +
+  geom_label(aes(x = 83, y = 23, 
+                 label = "Golovin"), 
+             hjust = -0.05, color = "red", family = "Dusha V5") +
+  geom_label(aes(x = 75, y = 11, 
+                 label = "Golovin"), 
+             hjust = -0.1, color = "red", family = "Dusha V5") +
+  geom_label(aes(x = 98, y = 0, 
+                 label = "Zhirkov"), 
+             vjust = -0.3, color = "red", family = "Dusha V5") +
+  geom_label(aes(x = 84, y = 6, 
+                 label = "Zhirkov"), 
+             vjust = -0.3, color = "red", family = "Dusha V5") +
+  geom_label(
+    data = saudi_data,
+    aes(x = x, y = y,
+        label = label),
+    color = "darkgreen", family = "Dusha V5") +
+  ggtitle(label = "Russia (5) vs. (0) Saudi Arabia", 
+          subtitle = "First goal, Yuri Gazinsky (12th Minute)") +
+  labs(caption = "By Ryo Nakagawara (@R_by_Ryo)") +
+  annotate("text", x = 69, y = 65, family = "Dusha V5",
+           label = "After a poor corner kick clearance\n from Saudi Arabia, Golovin picks up the loose ball, \n exchanges a give-and-go pass with Zhirkov\n before finding Gazinsky with a beautiful cross!")
 
+```
+
+初めての試みとしては悪くはないですね。
+
+どうやってサッカーボールのイメージを入れたかもっと詳しく説明しましょう。`ggimage`パッケージを使って好きなイメージをggplotに入れられます。使用するデータフレームに`image`カラムを作り、その中にイメージのurlを入れます。それで`geom_image()`関数で`image`引数でイメージのurlが入っているカラムを指定します。
+
+```{r ball img, eval=FALSE}
+goal_img <- data.frame(x = 100,
+                       y = 47) %>% 
+  mutate(image = "https://d30y9cdsu7xlg0.cloudfront.net/png/43563-200.png")
+
+## ggplot2 code ##
+geom_image(data = goal_img,
+             aes(x = x, y = y,
+                 image = image), 
+             size = 0.035)
+## ggplot2 code ##
+
+```
+
+## クリスティアーノ・ロナウドのハットトリック
+
+ポルトガル対スペインは素晴らしい試合でしたねー。物凄く刺激されてこの画像を作りました！
+
+```{r Cristiano data, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(ggsoccer)
+library(extrafont)
+library(emoGG)
+library(ggimage)
+
+goals_data <- data.frame(x = c(88, 80, 71),
+                         y = c(50, 48, 54),
+                         label = c(1, 2, 3))
+
+curve_data <- data.frame(x = c(88, 71), y = c(50, 54),
+                         xend = c(100, 100), yend = c(54, 54))
+
+annotation_data <- data.frame(
+  hjust = c(0.5, 0.5, 0.5, 0, 0, 0),
+  label = c("Portugal             (3) vs. Spain            (3)",
+            "Cristiano's Hattrick (4', 44', 88')",
+            "by Ryo Nakagawara (@R_by_Ryo)",
+            "1. Fouled by Nacho in the box,\nCristiano confidently strokes the ball\ninto the right corner from the spot.",
+            "2. Guedes lays it off to Cristiano whose\nstrong shot is uncharacteristically\nfumbled by De Gea into the net.",
+            "In the final minutes of the game,\nCristiano wins a freekick against Pique\nand curls it beautifully over the wall."),
+  x = c(110, 105, 53, 76, 66, 66), 
+  y = c(30, 20, 85, 5, 5, 55)
+)
+
+flag_data <- data.frame(
+  image = c("PT", "ES"),
+  x = c(110, 110),
+  y = c(19.1, 50.3)
+)
+
+```
+
+```{r Cristiano plot, fig.height=5, fig.width=8}
+
+ggplot(goals_data) +
+  annotate_pitch() +
+  theme_pitch() +
+  theme(text = element_text(family = "Dusha V5"),
+        legend.position = "none") +
+  coord_flip(xlim = c(55, 112),
+             ylim = c(-1, 101)) +
+  geom_segment(x = 80, y = 48, 
+               xend = 97, yend = 48) +  # 2nd 
+  geom_segment(x = 97, y = 48, 
+               xend = 100, yend = 45.5,
+               arrow = arrow(length = unit(0.25, "cm"),
+                             type = "closed")) +        # degea fumble
+  geom_curve(data = curve_data,
+             aes(x = x, y = y, 
+                 xend = xend, yend = yend),     # FREEKICK
+             curvature = 0.3, 
+             arrow = arrow(length = unit(0.25, "cm"), type = "closed")) +
+  geom_text(data = annotation_data,
+            family = "Dusha V5", 
+            aes(x = x, y = y,
+                hjust = hjust, label = label), 
+            size = c(6.5, 4.5, 3, 3.5, 3.5, 3.5)) +
+  geom_flag(data = flag_data,
+            aes(x = x, y = y,
+                image = image), size = c(0.08, 0.08)) +       # Portugal + Spain Flag
+  ggimage::geom_emoji(aes(x = 105, 
+                 y = c(45, 50, 55)),
+             image = "26bd", size = 0.035) +
+  geom_point(aes(x = x, y = y), 
+             shape = 21, size = 7, color = "black", fill = "white") +
+  geom_text(aes(x = x, y = y, label = label, family = "Dusha V5"))
+
+```
+
+最初の画像と違い、軸レーベル、タイトル、サブタイトルを`geom_text()`に入れてみました。これではレーベルとタイトルを注釈と同じデータフレーム`annotation_data`に入れられて少し便利になりました。従ってタイトルを入れる為、x軸の上限を増やさなきゃいけません。
+
+```{r, eval=FALSE}
+annotation_data <- data.frame(
+  hjust = c(0.5, 0.5, 0.5, 0, 0, 0),
+  label = c("Portugal             (3) vs. Spain            (3)",
+            "Cristiano's Hattrick (4', 44', 88')",
+            "by Ryo Nakagawara (@R_by_Ryo)",
+            "1. Fouled by Nacho in the box,\nCristiano confidently strokes the ball\ninto the right corner from the spot.",
+            "2. Guedes lays it off to Cristiano whose\nstrong shot is uncharacteristically\nfumbled by De Gea into the net.",
+            "In the final minutes of the game,\nCristiano wins a freekick against Pique\nand curls it beautifully over the wall."),
+  x = c(110, 105, 53, 76, 66, 66), 
+  y = c(30, 20, 85, 5, 5, 55)
+)
+```
+
+各国の旗を入れる為にレーベルのわざと国名とスコアの間に空白スペースを入れて、そのスペースに`geom_flag()`の座標を設置します。急激なハックですがまぁ～しょうがないです。。。他にemojiと文字列を同時に書けれる方法が無かったので！
+
+（追及：BenさんとHadley氏に話した後`emo::ji()`の関数を使えば文字列とemojiを同時に使えるはずだと聞いたので後程試してみます。）
+
+旗を表示するには`ggimage`パッケージの`geom_flag()`関数を使います。この関数は`image`引数に必要とする国旗の2桁ISOコードを入れなきゃいけません。ポルトガルは"PT"でスペインは"ES"です。下記にこのコードをより簡単に取得できる方法を説明します！
+
+```{r, eval = FALSE}
+## annotation code ##
+c("Portugal             (3) vs. Spain            (3)")
+## annotation code ##
+```
+
+```{r eval=FALSE}
+flag_data <- data.frame(
+  image = c("PT", "ES"),
+  x = c(110, 110),
+  y = c(19.1, 50.3)
+)
+
+## ggplot2 code ##
+geom_flag(data = flag_data,
+          aes(x = x, y = y,
+              image = image, size = size))  
+## ggplot2 code ##
+
+```
+
+旗をggplotで使いたいならば他の方法もあります。`ggflags`パッケージを使うか`geom_image()`関数に好みの旗のイメージurlを入れれば表示できます。
+
+今回は`geom_image()`でサッカーボールのイメージを使いませんでした。`emoGG`パッケージの`emoji_search()`関数で"soccer"を検索して、`geom_emoji()`関数のimage引数に見つけ出したemojiコードを指定できます。これからはこの方法でサッカーボールを表示します。
+
+ロシアワールドカップの公式フォントは"Dusha"と呼びます。2014にポルトガルのデザイン企業が作り上げて全ての商品やメディアに使われています。これをRで是非使ってみたい！最初はフォントの`TTF`ファイルを[ここ]()からダウンロードしてインストールします。それで`extrafont`パッケージで下記の関数を実行します。
+
+```{r extrafont, eval=FALSE}
+font_import()  # フォントのファイルをRにインポートします。
+
+font_install() # 新しいフォントをRにインストールします。
+
+loadfonts()    # 新しいセッションごと、実行します。
+
+fonts()        # 使えるフォントを確認できます。
+```
+
+もっと詳しい説明は[README](https://cran.r-project.org/web/packages/extrafont/README.html)（英語）をご覧ください。
 
 
 
